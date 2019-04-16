@@ -2,83 +2,61 @@
 
 namespace LAB6DS
 {
-    class RBTree : Tree
+    public class RBTree : Tree
     {
-        public class Node
-        {
-            public Color colour;
-            public Node left;
-            public Node right;
-            public Node parent;
-            public int data;
+        private const bool RED = true;
 
-            public Node(int data) { this.data = data; }
-            public Node(Color colour) { this.colour = colour; }
-            public Node(int data, Color colour) { this.data = data; this.colour = colour; }
+        private const bool BLACK = false;
+
+        internal class Node
+        {
+            public int data;
+            internal bool Color;
+            internal Node left;
+            internal Node right;
+
+            public Node(int data)
+            {
+                this.data = data;
+                this.Color = RED;
+                this.left = null;
+                this.right = null;
+            }
         }
 
         private Node root;
 
-        public RBTree() { }
+        internal Node Root => this.root;
 
-        private void LeftRotate(Node X)
+        public int Search(int data)
         {
-            Node Y = X.right; // set Y
-            X.right = Y.left;//turn Y's left subtree into X's right subtree
-            if (Y.left != null)
+            Node r = this.root;
+            while (r != null)
             {
-                Y.left.parent = X;
+                int cmp = r.data.CompareTo(data);
+
+                if (cmp == 0)
+                {
+                    return r.data;
+                }
+
+                if (cmp < 0)
+                {
+                    r = r.left;
+                }
+                else
+                {
+                    r = r.right;
+                }
             }
 
-            Y.parent = X.parent;//link X's parent to Y
-
-            if (X.parent == null)
-            {
-                root = Y;
-            }
-            else if (X == X.parent.left)
-            {
-                X.parent.left = Y;
-            }
-            else
-            {
-                X.parent.right = Y;
-            }
-            Y.left = X; //put X on Y's left
-
-            X.parent = Y;
-
+            return data;
         }
 
-        private void RightRotate(Node X)
+        public override void Add( int data)
         {
-            // right rotate is simply mirror code from left rotate
-            Node Y = X.left;
-            X.left = Y.right;
-            if (Y.right != null)
-            {
-                Y.right.parent = X;
-            }
-
-
-            Y.parent = X.parent;
-
-            if (X.parent == null)
-            {
-                root = Y;
-            }
-            else if (X == X.parent.left)
-            {
-                X.parent.left = Y;
-            }
-            else
-            {
-                X.parent.right = Y;
-            }
-
-            Y.right = X;//put Y on X's right            
-            X.parent = Y;
-
+            this.root = RBTree.Insert(this.root, data);
+            this.root.Color = BLACK;
         }
 
         public void DisplayTree()
@@ -94,85 +72,6 @@ namespace LAB6DS
             }
         }
 
-        public Node Find(int key)
-        {
-            bool isFound = false;
-            Node temp = root;
-            Node item = null;
-            while (!isFound)
-            {
-                if (temp == null)
-                {
-                    break;
-                }
-                if (key < temp.data)
-                {
-                    temp = temp.left;
-                }
-                if (key > temp.data)
-                {
-                    temp = temp.right;
-                }
-                if (key == temp.data)
-                {
-                    isFound = true;
-                    item = temp;
-                }
-            }
-            if (isFound)
-            {
-                Console.WriteLine("{0} was found", key);
-                return temp;
-            }
-            else
-            {
-                Console.WriteLine("{0} not found", key);
-                return null;
-            }
-        }
-
-        public override void Add(int data)
-        {
-            Node newItem = new Node(data);
-            if (root == null)
-            {
-                root = newItem;
-                root.colour = Color.Black;
-                return;
-            }
-            Node Y = null;
-            Node X = root;
-            while (X != null)
-            {
-                Y = X;
-                if (newItem.data < X.data)
-                {
-                    X = X.left;
-                }
-                else
-                {
-                    X = X.right;
-                }
-            }
-            newItem.parent = Y;
-            if (Y == null)
-            {
-                root = newItem;
-            }
-            else if (newItem.data < Y.data)
-            {
-                Y.left = newItem;
-            }
-            else
-            {
-                Y.right = newItem;
-            }
-            newItem.left = null;
-            newItem.right = null;
-            newItem.colour = Color.Red;//colour the new node red
-            InsertFixUp(newItem);//call method to check for violations and fix
-        }
-
         private void InOrderDisplay(Node current)
         {
             if (current != null)
@@ -183,219 +82,230 @@ namespace LAB6DS
             }
         }
 
-        private void InsertFixUp(Node item)
+        public void DeleteMin()
         {
-            //Checks Red-Black Tree properties
-            while (item != root && item.parent.colour == Color.Red)
+            Node deletedNode;
+            this.root = RBTree.DeleteMin(this.root, out deletedNode);
+            if (this.root != null)
             {
-                /*We have a violation*/
-                if (item.parent == item.parent.parent.left)
-                {
-                    Node Y = item.parent.parent.right;
-                    if (Y != null && Y.colour == Color.Red)//Case 1: uncle is red
-                    {
-                        item.parent.colour = Color.Black;
-                        Y.colour = Color.Black;
-                        item.parent.parent.colour = Color.Red;
-                        item = item.parent.parent;
-                    }
-                    else //Case 2: uncle is black
-                    {
-                        if (item == item.parent.right)
-                        {
-                            item = item.parent;
-                            LeftRotate(item);
-                        }
-                        //Case 3: recolour & rotate
-                        item.parent.colour = Color.Black;
-                        item.parent.parent.colour = Color.Red;
-                        RightRotate(item.parent.parent);
-                    }
-
-                }
-                else
-                {
-                    //mirror image of code above
-                    Node X = null;
-
-                    X = item.parent.parent.left;
-                    if (X != null && X.colour == Color.Black)//Case 1
-                    {
-                        item.parent.colour = Color.Red;
-                        X.colour = Color.Red;
-                        item.parent.parent.colour = Color.Black;
-                        item = item.parent.parent;
-                    }
-                    else //Case 2
-                    {
-                        if (item == item.parent.left)
-                        {
-                            item = item.parent;
-                            RightRotate(item);
-                        }
-                        //Case 3: recolour & rotate
-                        item.parent.colour = Color.Black;
-                        item.parent.parent.colour = Color.Red;
-                        LeftRotate(item.parent.parent);
-
-                    }
-
-                }
-                root.colour = Color.Black;//re-colour the root black as necessary
+                this.root.Color = BLACK;
             }
         }
 
-        public void Delete(int key)
+        public void Delete(int data)
         {
-            //first find the node in the tree to delete and assign to item pointer/reference
-            Node item = Find(key);
-            Node X = null;
-            Node Y = null;
-
-            if (item == null)
+            this.root = RBTree.Delete(this.root, data);
+            if (root != null)
             {
-                Console.WriteLine("Nothing to delete!");
-                return;
+                this.root.Color = BLACK;
             }
-            if (item.left == null || item.right == null)
+        }
+
+        private static Node Insert(Node p, int data)
+        {
+            if (p == null)
             {
-                Y = item;
+                return new Node(data);
+            }
+
+            if (RBTree.IsRed(p.left) && RBTree.IsRed(p.right))
+            {
+                RBTree.FlipColors(p);
+            }
+
+            int cmp = data.CompareTo(p.data);
+            if (cmp == 0)
+            {
+                p.data = data;
+            }
+
+            if (cmp < 0)
+            {
+                p.left = RBTree.Insert(p.left, data);
             }
             else
             {
-                Y = TreeSuccessor(item);
+                p.right = RBTree.Insert(p.right, data);
             }
-            if (Y.left != null)
+
+            if (RBTree.IsRed(p.right) && !RBTree.IsRed(p.left))
             {
-                X = Y.left;
+                p = RBTree.RotateLeft(p);
+            }
+
+            if (RBTree.IsRed(p.left) && RBTree.IsRed(p.left.left))
+            {
+                p = RBTree.RotateRight(p);
+            }
+
+            return p;
+        }
+
+        private static Node Delete(Node p, int data)
+        {
+            if (p == null)
+            {
+                return null;
+            }
+
+            if (data.CompareTo(p.data) < 0)
+            {
+                if (p.left == null)
+                {
+                    return p;
+                }
+
+                if (!RBTree.IsRed(p.left) && p.left != null && !RBTree.IsRed(p.left.left))
+                {
+                    p = RBTree.MoveRedLeft(p);
+                }
+
+                p.left = RBTree.Delete(p.left, data);
+                return RBTree.Fix(p);
+            }
+
+            // Right side of tree
+            if (RBTree.IsRed(p.left))
+            {
+                p = RBTree.RotateRight(p);
+            }
+
+            if (data.CompareTo(p.data) == 0 && p.right == null)
+            {
+                return null;
+            }
+
+            if (!RBTree.IsRed(p.right) && p.right != null && !RBTree.IsRed(p.right.left))
+            {
+                p = RBTree.MoveRedRight(p);
+            }
+
+            if (data.CompareTo(p.data) == 0)
+            {
+                Node deletedNode;
+                p.right = RBTree.DeleteMin(p.right, out deletedNode);
+                if (deletedNode == null)
+                {
+                    throw new ArgumentOutOfRangeException("Delete min node was null");
+                }
+
+                p.data = deletedNode.data;
+                p.data = deletedNode.data;
             }
             else
             {
-                X = Y.right;
-            }
-            if (X != null)
-            {
-                X.parent = Y;
-            }
-            if (Y.parent == null)
-            {
-                root = X;
-            }
-            else if (Y == Y.parent.left)
-            {
-                Y.parent.left = X;
-            }
-            else
-            {
-                Y.parent.left = X;
-            }
-            if (Y != item)
-            {
-                item.data = Y.data;
-            }
-            if (Y.colour == Color.Black)
-            {
-                DeleteFixUp(X);
+                p.right = RBTree.Delete(p.right, data);
             }
 
+            return RBTree.Fix(p);
         }
 
-        private void DeleteFixUp(Node X)
+        private static Node DeleteMin(Node p, out Node deleted)
         {
-
-            while (X != null && X != root && X.colour == Color.Black)
+            if (p == null)
             {
-                if (X == X.parent.left)
-                {
-                    Node W = X.parent.right;
-                    if (W.colour == Color.Red)
-                    {
-                        W.colour = Color.Black; //case 1
-                        X.parent.colour = Color.Red; //case 1
-                        LeftRotate(X.parent); //case 1
-                        W = X.parent.right; //case 1
-                    }
-                    if (W.left.colour == Color.Black && W.right.colour == Color.Black)
-                    {
-                        W.colour = Color.Red; //case 2
-                        X = X.parent; //case 2
-                    }
-                    else if (W.right.colour == Color.Black)
-                    {
-                        W.left.colour = Color.Black; //case 3
-                        W.colour = Color.Red; //case 3
-                        RightRotate(W); //case 3
-                        W = X.parent.right; //case 3
-                    }
-                    W.colour = X.parent.colour; //case 4
-                    X.parent.colour = Color.Black; //case 4
-                    W.right.colour = Color.Black; //case 4
-                    LeftRotate(X.parent); //case 4
-                    X = root; //case 4
-                }
-                else //mirror code from above with "right" & "left" exchanged
-                {
-                    Node W = X.parent.left;
-                    if (W.colour == Color.Red)
-                    {
-                        W.colour = Color.Black;
-                        X.parent.colour = Color.Red;
-                        RightRotate(X.parent);
-                        W = X.parent.left;
-                    }
-                    if (W.right.colour == Color.Black && W.left.colour == Color.Black)
-                    {
-                        W.colour = Color.Black;
-                        X = X.parent;
-                    }
-                    else if (W.left.colour == Color.Black)
-                    {
-                        W.right.colour = Color.Black;
-                        W.colour = Color.Red;
-                        LeftRotate(W);
-                        W = X.parent.left;
-                    }
-                    W.colour = X.parent.colour;
-                    X.parent.colour = Color.Black;
-                    W.left.colour = Color.Black;
-                    RightRotate(X.parent);
-                    X = root;
-                }
+                deleted = null;
+                return null;
             }
-            if (X != null)
-                X.colour = Color.Black;
+
+            if (p.left == null)
+            {
+                deleted = p;
+                return null;
+            }
+
+            if (!RBTree.IsRed(p.left) && !RBTree.IsRed(p.left.left))
+            {
+                p = RBTree.MoveRedLeft(p);
+            }
+
+            p.left = RBTree.DeleteMin(p.left, out deleted);
+            return RBTree.Fix(p);
         }
 
-        private Node Minimum(Node X)
+        private static Node Fix(Node p)
         {
-            while (X.left.left != null)
+            if (RBTree.IsRed(p.right))
             {
-                X = X.left;
+                p = RBTree.RotateLeft(p);
             }
-            if (X.left.right != null)
+
+            if (RBTree.IsRed(p.left) && RBTree.IsRed(p.left.left))
             {
-                X = X.left.right;
+                p = RBTree.RotateRight(p);
             }
-            return X;
+
+            if (RBTree.IsRed(p.left) && RBTree.IsRed(p.right))
+            {
+                RBTree.FlipColors(p);
+            }
+
+            return p;
         }
 
-        private Node TreeSuccessor(Node X)
+        private static Node MoveRedLeft(Node p)
         {
-            if (X.left != null)
+            RBTree.FlipColors(p);
+            if (RBTree.IsRed(p.right.left))
             {
-                return Minimum(X);
+                p.right = RBTree.RotateRight(p.right);
+                p = RBTree.RotateLeft(p);
+                RBTree.FlipColors(p);
             }
-            else
-            {
-                Node Y = X.parent;
-                while (Y != null && X == Y.right)
-                {
-                    X = Y;
-                    Y = Y.parent;
-                }
-                return Y;
-            }
+
+            return p;
         }
+
+        private static Node MoveRedRight(Node p)
+        {
+            RBTree.FlipColors(p);
+            if (RBTree.IsRed(p.left.left))
+            {
+                p = RBTree.RotateRight(p);
+                RBTree.FlipColors(p);
+            }
+
+            return p;
+        }
+
+        private static void FlipColors(Node p)
+        {
+            p.Color = !p.Color;
+            p.left.Color = !p.left.Color;
+            p.right.Color = !p.right.Color;
+        }
+
+        private static Node RotateLeft(Node p)
+        {
+            var tmp = p.right;
+            p.right = tmp.left;
+            tmp.left = p;
+            tmp.Color = p.Color;
+            p.Color = RED;
+            return tmp;
+        }
+
+        private static Node RotateRight(Node p)
+        {
+            var tmp = p.left;
+            p.left = tmp.right;
+            tmp.right = p;
+            tmp.Color = p.Color;
+            p.Color = RED;
+            return tmp;
+        }
+
+        private static bool IsRed(Node p)
+        {
+            if (p == null)
+            {
+                return false;
+            }
+
+            return p.Color == RED;
+        }
+
+
 
         public override int DepthOf(int n)
         {
@@ -433,6 +343,7 @@ namespace LAB6DS
             if (node == null) return 0;
             return Math.Max(MaxDepth(node.left), MaxDepth(node.right)) + 1;
         }
+
 
     }
 }

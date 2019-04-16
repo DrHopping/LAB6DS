@@ -53,6 +53,7 @@ namespace LAB6DS
             double averageRB = AverageDepth(randElements, rb);
             double averageAVL = AverageDepth(randElements, avl);
             Console.WriteLine($"Average depth of RB with {elements} element is {averageRB}");
+            rb.DisplayTree();
             Console.WriteLine($"Average depth of AVL with {elements} element is {averageAVL}");
         }
 
@@ -80,12 +81,12 @@ namespace LAB6DS
 
         static void Main(string[] args)
         {
-            //for (int i = 1000; i <= 10000; i += 1000)
-            //{
-            //    CompareMax(i);
-            //    Console.WriteLine("==========================================");
-            //}
-            Test();
+            for (int i = 1000; i <= 10000; i += 1000)
+            {
+                CompareAverage(i);
+                Console.WriteLine("==========================================");
+            }
+            //Test();
             Console.ReadLine();
         }
     }
