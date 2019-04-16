@@ -53,7 +53,6 @@ namespace LAB6DS
             double averageRB = AverageDepth(randElements, rb);
             double averageAVL = AverageDepth(randElements, avl);
             Console.WriteLine($"Average depth of RB with {elements} element is {averageRB}");
-            rb.DisplayTree();
             Console.WriteLine($"Average depth of AVL with {elements} element is {averageAVL}");
         }
 
