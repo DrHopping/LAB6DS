@@ -1,4 +1,6 @@
-﻿namespace LAB6DS
+﻿using System;
+
+namespace LAB6DS
 {
     class AVLTree : Tree
     {
@@ -205,6 +207,18 @@
 
             return ++count + DepthOf(n, ((node.data > n) ? node.left : node.right));
 
+        }
+
+        public override int MaxDepth()
+        {
+            if (root == null) return 0;
+            return Math.Max(MaxDepth(root.left), MaxDepth(root.right)) + 1;
+        }
+
+        private int MaxDepth(Node node)
+        {
+            if (node == null) return 0;
+            return Math.Max(MaxDepth(node.left), MaxDepth(node.right)) + 1;
         }
     }
 }

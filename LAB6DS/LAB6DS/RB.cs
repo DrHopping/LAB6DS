@@ -2,7 +2,7 @@
 
 namespace LAB6DS
 {
-    class RBTree// : Tree
+    class RBTree : Tree
     {
         public class Node
         {
@@ -30,8 +30,8 @@ namespace LAB6DS
                 Y.left.parent = X;
             }
 
-                Y.parent = X.parent;//link X's parent to Y
-            
+            Y.parent = X.parent;//link X's parent to Y
+
             if (X.parent == null)
             {
                 root = Y;
@@ -45,43 +45,40 @@ namespace LAB6DS
                 X.parent.right = Y;
             }
             Y.left = X; //put X on Y's left
-            
-                X.parent = Y;
-            
+
+            X.parent = Y;
 
         }
 
-        private void RightRotate(Node Y)
+        private void RightRotate(Node X)
         {
             // right rotate is simply mirror code from left rotate
-            Node X = Y.left;
-            Y.left = X.right;
-            if (X.right != null)
+            Node Y = X.left;
+            X.left = Y.right;
+            if (Y.right != null)
             {
-                X.right.parent = Y;
-            }
-            if (X != null)
-            {
-                X.parent = Y.parent;
-            }
-            if (Y.parent == null)
-            {
-                root = X;
-            }
-            if (Y == Y.parent.right)
-            {
-                Y.parent.right = X;
-            }
-            if (Y == Y.parent.left)
-            {
-                Y.parent.left = X;
+                Y.right.parent = X;
             }
 
-            X.right = Y;//put Y on X's right
-            if (Y != null)
+
+            Y.parent = X.parent;
+
+            if (X.parent == null)
             {
-                Y.parent = X;
+                root = Y;
             }
+            else if (X == X.parent.left)
+            {
+                X.parent.left = Y;
+            }
+            else
+            {
+                X.parent.right = Y;
+            }
+
+            Y.right = X;//put Y on X's right            
+            X.parent = Y;
+
         }
 
         public void DisplayTree()
@@ -134,7 +131,7 @@ namespace LAB6DS
             }
         }
 
-        public void Insert(int data)
+        public override void Add(int data)
         {
             Node newItem = new Node(data);
             if (root == null)
@@ -175,6 +172,7 @@ namespace LAB6DS
             newItem.colour = Color.Red;//colour the new node red
             InsertFixUp(newItem);//call method to check for violations and fix
         }
+
         private void InOrderDisplay(Node current)
         {
             if (current != null)
@@ -184,6 +182,7 @@ namespace LAB6DS
                 InOrderDisplay(current.right);
             }
         }
+
         private void InsertFixUp(Node item)
         {
             //Checks Red-Black Tree properties
@@ -366,6 +365,7 @@ namespace LAB6DS
             if (X != null)
                 X.colour = Color.Black;
         }
+
         private Node Minimum(Node X)
         {
             while (X.left.left != null)
@@ -378,6 +378,7 @@ namespace LAB6DS
             }
             return X;
         }
+
         private Node TreeSuccessor(Node X)
         {
             if (X.left != null)
@@ -396,7 +397,7 @@ namespace LAB6DS
             }
         }
 
-        public int DepthOf(int n)
+        public override int DepthOf(int n)
         {
             int count = 0;
             if (root == null)
@@ -419,6 +420,18 @@ namespace LAB6DS
 
             return ++count + DepthOf(n, ((node.data > n) ? node.left : node.right));
 
+        }
+
+        public override int MaxDepth()
+        {
+            if (root == null) return 0;
+            return Math.Max(MaxDepth(root.left), MaxDepth(root.right)) + 1;
+        }
+
+        private int MaxDepth(Node node)
+        {
+            if (node == null) return 0;
+            return Math.Max(MaxDepth(node.left), MaxDepth(node.right)) + 1;
         }
 
     }
